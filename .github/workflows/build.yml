@@ -13,7 +13,7 @@ jobs:
     name: Build to other branch
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@main
+    - uses: actions/checkout@v2
 
     - name: Install all dependencies
       run: npm install
