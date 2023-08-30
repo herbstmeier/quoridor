@@ -26,6 +26,6 @@ jobs:
       env:
         REPO: self
         BRANCH: deploy
-        FOLDER: dist
+        FOLDER: frontend/dist
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TARGET_DIR: frontend
