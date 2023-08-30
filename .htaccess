@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+   RewriteEngine on
+
+   # Set the base directory to /backend/public/
+   RewriteBase /backend/public/
+   
+   RewriteCond %{REQUEST_FILENAME} !-f
+   RewriteCond %{REQUEST_FILENAME} !-d
+   # Redirect requests to /api/... to /backend/public/index.php
+   RewriteRule ^api/.*$ index.php [L]
+</IfModule>
