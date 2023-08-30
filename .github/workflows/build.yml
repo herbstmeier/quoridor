@@ -4,10 +4,6 @@ on:
     branches:
       - main
 
-defaults:
-  run:
-    working-directory: frontend
-
 jobs:
   build:
     name: Build to other branch
@@ -17,9 +13,11 @@ jobs:
 
     - name: Install all dependencies
       run: npm install
+      working-directory: frontend
 
     - name: Build
       run: npm run build # The build command of your project
+      working-directory: frontend
 
     - name: Push frontend
       uses: s0/git-publish-subdir-action@develop
@@ -28,7 +26,6 @@ jobs:
         BRANCH: deploy
         FOLDER: frontend/dist
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TARGET_DIR: /
 
     - name: Push backend
       uses: s0/git-publish-subdir-action@develop
