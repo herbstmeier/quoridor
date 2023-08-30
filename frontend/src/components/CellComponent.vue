@@ -5,7 +5,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { theme } from '@/state'
+import { theme, user } from '@/state'
 
 export default defineComponent({
   name: 'CellComponent',
@@ -24,7 +24,7 @@ export default defineComponent({
   },
   computed: {
     cellColor() {
-      return `hsl(${this.boardHue} 30% ${ theme.value === 'dark' ? '40%' : '60%' } / 1)`
+      return `hsl(${user?.data?.boardHue ?? 22} 30% ${ theme.value === 'dark' ? '40%' : '60%' } / 1)`
     }
   },
   created: function () {

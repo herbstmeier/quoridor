@@ -14,7 +14,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import CellComponentVue from './CellComponent.vue'
-import { theme } from '@/state'
+import { theme, user } from '@/state'
 import { Bitmatrix } from '@/classes/Bitmatrix'
 
 export default defineComponent({
@@ -74,7 +74,7 @@ export default defineComponent({
   },
   computed: {
     boardColor(): string {
-      return `hsl(${this.boardHue} 30% ${theme.value === 'dark' ? '60%' : '40%'} / 1)`
+      return `hsl(${user?.data?.boardHue ?? 22} 30% ${theme.value === 'dark' ? '60%' : '40%'} / 1)`
     }
   },
   created: function () {

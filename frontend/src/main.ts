@@ -1,5 +1,4 @@
 import './assets/main.scss'
-import axios from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createApp } from 'vue'
 import App from './App.vue'
@@ -14,9 +13,10 @@ app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(router)
 app.mount('#app')
 
-app.config.globalProperties.$axios = axiosSetup()
+const axiosInstance = axiosSetup()
+app.config.globalProperties.$axios = axiosInstance
 declare module 'vue' {
     interface ComponentCustomProperties {
-        $axios: typeof axios,
+        $axios: typeof axiosInstance,
     }
 }
