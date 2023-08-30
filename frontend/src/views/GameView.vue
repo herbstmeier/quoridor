@@ -33,7 +33,7 @@ export default defineComponent({
   },
   created: function () {
     this.$axios
-      .get(`/game?game_id=${this.$route.params.id}/full`)
+      .get(`/game?gameId=${this.$route.params.id}/full`)
       .then(
         (res: { data: { game: Game; moves: Move[]; players: User[]; positions: Position[] } }) => {
           this.game = res.data.game

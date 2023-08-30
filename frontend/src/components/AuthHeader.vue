@@ -18,7 +18,7 @@ export default defineComponent({
   },
   methods: {
     logout() {
-      this.$axios.post(`/user?userId=${user.data.userId}/logout`)
+      this.$axios.post(`/user/logout`)
     }
   }
 })
