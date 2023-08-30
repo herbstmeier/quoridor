@@ -12,4 +12,7 @@ $app->get('/', function (Request $request, Response $response, $args) {
     return $response;
 });
 
+$app->addErrorMiddleware(false, true, true);
+
 $app->run();
+?>
