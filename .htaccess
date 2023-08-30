@@ -4,9 +4,8 @@
    # Set the base directory to /backend/public/
    RewriteBase /backend/public/
    
-   # Redirect to index.php if the requested resource doesn't exist
    RewriteCond %{REQUEST_FILENAME} !-f
    RewriteCond %{REQUEST_FILENAME} !-d
-   RewriteRule ^ index.php [L]
-   
+   # Redirect requests to /api/... to /backend/public/index.php
+   RewriteRule ^api/.*$ /backend/public/index.php [L]
 </IfModule>
