@@ -7,5 +7,5 @@
    RewriteCond %{REQUEST_FILENAME} !-f
    RewriteCond %{REQUEST_FILENAME} !-d
    # Redirect requests to /api/... to /backend/public/index.php
-   RewriteRule ^api/.*$ /backend/public/index.php [L]
+   RewriteRule ^api/.*$ index.php [L]
 </IfModule>
