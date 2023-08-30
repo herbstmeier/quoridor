@@ -1,0 +1,87 @@
+<template>
+  <div class="big-input-container">
+    <label class="field-label font-s" :for="fieldName">{{ label }}</label>
+    <input
+      class="field-input font-s"
+      :name="fieldName"
+      v-bind="val"
+      v-model="value"
+      @input="onInput"
+    />
+    <span class="field-error font-xs" v-if="errorMsg">{{ errorMsg }}</span>
+  </div>
+</template>
+<script lang="ts">
+import { nextTick } from 'vue'
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  name: 'BigInput',
+  props: {
+    label: String,
+    val: Object,
+    customError: {
+      type: String,
+      default: ''
+    }
+  },
+  data() {
+    return {
+      value: null,
+      fieldName: this.label?.replace(/[^a-zA-Z]/g, ''),
+      error: ''
+    }
+  },
+  emits: {
+    change: null,
+    validation: null
+  },
+  methods: {
+    async onInput(e: Event) {
+      const input = e.target as HTMLInputElement
+      this.$emit('change', input.value)
+      await nextTick()
+      if (input.checkValidity()) {
+        this.$emit('validation', true)
+        this.error = ''
+      } else {
+        this.$emit('validation', false)
+        this.error = input.validationMessage.toLocaleLowerCase() ?? ''
+      }
+    }
+  },
+  computed: {
+    errorMsg() {
+      if (this.customError) {
+        return this.customError
+      } else {
+        return this.error
+      }
+    }
+  }
+})
+</script>
+<style lang="scss">
+.big-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+
+  .field-input {
+    border: none;
+    padding: 5px 1rem;
+    &:focus-visible {
+      outline: solid var(--color-primary);
+      border-radius: var(--default-radius);
+    }
+    &:hover {
+      border-radius: var(--default-radius);
+    }
+  }
+
+  .field-error {
+    color: var(--color-error);
+  }
+}
+</style>

@@ -1,0 +1,35 @@
+:root {
+  --font-xs: 12px;
+  --font-s: 17px;
+  --font-m: 24px;
+  --font-l: 50px;
+  --spacing: 2rem;
+
+  --color-primary: hsl(178, 80%, 70%);
+  --color-accent: #fee6b1;
+  --color-error: rgb(255, 119, 70);
+  --color-neutral: hsl(270, 5%, 40%);
+  --default-radius: 5px;
+  --color-cell-option: hsl(117, 40%, 64%);
+}
+
+/* semantic color variables for this project */
+body.light {
+  --color-primary-translucent: rgb(136, 101, 173, 0.2);
+
+  --color-background: hsl(78, 75%, 86%);
+  --color-translucent: rgba(0, 0, 0, 0.2);
+  --color-text: #393939;
+
+  background: linear-gradient(45deg, var(--color-background), white);
+}
+
+body.dark {
+  --color-primary-translucent: rgb(229, 255, 167, 0.2);
+
+  --color-background: hsl(269, 96%, 9%);
+  --color-translucent: rgba(255, 255, 255, 0.2);
+  --color-text: rgb(226, 223, 223);
+
+  background: linear-gradient(45deg, var(--color-background), black);
+}

@@ -1,0 +1,105 @@
+@import './base.scss';
+
+#app {
+  margin: 0 auto;
+  font-weight: normal;
+
+  main {
+    padding: 2rem;
+  }
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+@media (hover: hover) {
+  a:hover {
+    color: var(--color-primary);
+  }
+}
+
+button {
+  background-color: var(--color-primary);
+  width: fit-content;
+  padding: 5px 1rem;
+  border: solid 2px transparent;
+  cursor: pointer;
+  &:hover {
+    border: solid 2px var(--color-translucent);
+    border-radius: var(--default-radius);
+  }
+  &:disabled {
+    border-style: dashed;
+    cursor: vertical-text;
+    background-color: var(--color-translucent);
+  }
+  &:focus-visible {
+    outline: solid var(--color-primary);
+    border-color: transparent;
+  }
+}
+
+.auth-form-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+
+  .auth-form {
+    gap: 5px;
+    width: 30rem;
+    padding: 1rem;
+
+    .auth-submit {
+      font-size: var(--font-s);
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+  }
+}
+
+.list-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-translucent);
+  border-radius: var(--default-radius);
+  overflow: hidden;
+  height: fit-content;
+
+  .list-title {
+    padding: 1rem 0;
+    background: var(--color-translucent);
+    width: 100%;
+    text-align: center;
+  }
+
+  .list-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .list-item-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 10px;
+      border-radius: var(--default-radius);
+
+      &:not(.top-row):hover {
+        background-color: var(--color-translucent);
+        cursor: pointer;
+        color: var(--color-primary);
+      }
+
+      &.top-row > * {
+        font-weight: bold;
+      }
+    }
+  }
+}
