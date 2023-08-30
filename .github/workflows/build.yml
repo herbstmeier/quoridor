@@ -4,6 +4,10 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    working-directory: frontend
+
 jobs:
   build:
     name: Build to other branch
@@ -22,6 +26,6 @@ jobs:
       env:
         REPO: self
         BRANCH: deploy
-        FOLDER: frontend/dist
+        FOLDER: dist
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TARGET_DIR: frontend
