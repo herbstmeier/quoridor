@@ -36,6 +36,18 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TARGET_DIR: backend
 
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
+        tools: composer:v2
+
+    - name: Install Composer Dependencies
+      run: |
+        git checkout deploy
+        composer install --no-dev --optimize-autoloader
+      working-directory: backend
+
     - name: Copy .htaccess
       env:
         TARGET_BRANCH: 'deploy'
@@ -48,14 +60,3 @@ jobs:
         git add .htaccess
         git diff-index --quiet HEAD ||  git commit -am "Deploy files"  # Commit to the repository (ignore if no modification)
         git push origin $TARGET_BRANCH # Push to remote branch
-
-    - name: Set up PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.0'
-        tools: composer:v2
-
-    - name: Install Composer Dependencies
-      run: |
-        composer install --no-dev --optimize-autoloader
-      working-directory: backend
