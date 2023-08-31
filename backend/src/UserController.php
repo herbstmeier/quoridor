@@ -26,7 +26,76 @@ class UserController
 
     public function loginUser(Request $request, Response $response, $args)
     {
-        // Controller logic for logging in a user
+        // Get the request data (e.g., JSON or form data)
+        $data = $request->getParsedBody();
+
+        // Check if both username and password are provided
+        if (empty($data['username']) || empty($data['password'])) {
+            // Handle missing username or password
+            $responseBody = json_encode(['error' => 'Username and password are required.']);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400) // Bad Request status code
+                ->write($responseBody);
+        }
+
+        // Retrieve user data from the database based on the provided username
+        $username = $data['username'];
+
+        // Get the secret key from the configuration file
+        require 'config.php'; // Assuming 'config.php' is in the same directory
+
+        $sql = 'SELECT * FROM users WHERE username = :username';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':username', $username);
+
+        try {
+            $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$user) {
+                // User not found, return an error response
+                $responseBody = json_encode(['error' => 'User not found']);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(404) // Not Found status code
+                    ->write($responseBody);
+            }
+
+            // Verify the password using the secret key from the configuration file
+            $password = $data['password'];
+            $hashedPassword = $user['password'];
+            $salt = $user['salt'];
+
+            // Check if the password is correct
+            if (password_verify($password . $salt, $hashedPassword)) {
+                // Password is correct, user is logged in
+
+                // Generate a JWT token
+                $token = $this->generateToken($user);
+
+                // Return the token to the client
+                $responseBody = json_encode(['token' => $token]);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(200) // OK status code
+                    ->write($responseBody);
+            } else {
+                // Password is incorrect, return an error response
+                $responseBody = json_encode(['error' => 'Incorrect password']);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(401) // Unauthorized status code
+                    ->write($responseBody);
+            }
+        } catch (\PDOException $e) {
+            // Handle database errors and return an error response
+            $responseBody = json_encode(['error' => 'Login failed']);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(500) // Internal Server Error status code
+                ->write($responseBody);
+        }
     }
 
     public function registerUser(Request $request, Response $response, $args)
@@ -69,6 +138,7 @@ class UserController
 
         try {
             $stmt->execute();
+            $lastInsertedUserId = $pdo->lastInsertId();
         } catch (\PDOException $e) {
             // Handle database errors and return an error response
             $responseBody = json_encode(['error' => 'Failed to register user']);
@@ -79,10 +149,14 @@ class UserController
         }
 
         // Registration successful, return a success response
-        $responseBody = json_encode(['message' => 'Registration successful']);
+        // Generate a JWT token
+        $token = $this->generateToken(['userId' => $lastInsertedUserId, 'username' => $data['username']]);
+
+        // Return the token to the client
+        $responseBody = json_encode(['token' => $token]);
         return $response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus(201) // Created status code
+            ->withStatus(200) // OK status code
             ->write($responseBody);
     }
 
@@ -119,5 +193,23 @@ class UserController
         }
 
         return $errors;
+    }
+
+    // Function to generate a JWT token
+    private function generateToken($user)
+    {
+        // Get the user data for token payload
+        $payload = [
+            'userId' => $user['userId'],
+            'username' => $user['username'],
+        ];
+
+        // Get the secret key from the configuration file
+        require '../config/config.php';
+
+        // Encode the payload using the secret key
+        $token = JWT::encode($payload, SECRET_KEY, 'HS256');
+
+        return $token;
     }
 }
