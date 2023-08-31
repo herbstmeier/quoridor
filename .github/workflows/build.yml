@@ -49,9 +49,13 @@ jobs:
         git diff-index --quiet HEAD ||  git commit -am "Deploy files"  # Commit to the repository (ignore if no modification)
         git push origin $TARGET_BRANCH # Push to remote branch
 
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
+        tools: composer:v2
+
     - name: Install Composer Dependencies
       run: |
-        cd backend
         composer install --no-dev --optimize-autoloader
-      env:
-        TARGET_BRANCH: 'deploy'
+      working-directory: deploy
