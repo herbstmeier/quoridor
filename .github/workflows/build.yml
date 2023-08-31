@@ -58,4 +58,4 @@ jobs:
     - name: Install Composer Dependencies
       run: |
         composer install --no-dev --optimize-autoloader
-      working-directory: deploy
+      working-directory: backend
