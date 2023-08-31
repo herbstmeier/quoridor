@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -9,6 +10,14 @@ require_once 'Database.php';
 
 class UserController
 {
+    private $container;
+
+    // constructor receives container instance
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
     public function getAllUsers(Request $request, Response $response, $args)
     {
         // Controller logic for getting all users
