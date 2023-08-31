@@ -2,5 +2,5 @@
    RewriteEngine on
 
    # Redirect requests to /api/... to /backend/public/index.php
-   RewriteRule ^api/.*$ index.php [L]
+   RewriteRule ^api/(.*)$ /backend/public/index.php/$1 [L]
 </IfModule>
