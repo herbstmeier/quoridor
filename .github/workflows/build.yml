@@ -42,12 +42,6 @@ jobs:
         php-version: '8.0'
         tools: composer:v2
 
-    - name: Install Composer Dependencies
-      run: |
-        git checkout deploy
-        composer install --no-dev --optimize-autoloader
-      working-directory: backend
-
     - name: Copy .htaccess
       env:
         TARGET_BRANCH: 'deploy'
@@ -58,5 +52,8 @@ jobs:
         git checkout $TARGET_BRANCH       # Checkout to your branch
         git checkout main .htaccess # Copy files from the source branch
         git add .htaccess
+        cd backend
+        composer install --no-dev --optimize-autoloader
+        git add vendor
         git diff-index --quiet HEAD ||  git commit -am "Deploy files"  # Commit to the repository (ignore if no modification)
         git push origin $TARGET_BRANCH # Push to remote branch
