@@ -7,12 +7,15 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $app = AppFactory::create();
 
-$app->get('/', function (Request $request, Response $response, $args) {
-    $response->getBody()->write("Hello world!");
-    return $response;
-});
+$app->get('/{route:.+}', function (Request $request, Response $response, $args) {
+    // Retrieve the requested URL from the request object
+    $url = $request->getUri()->getPath();
 
-$app->addErrorMiddleware(false, true, true);
+    // You can also return a JSON response if needed
+    $response->getBody()->write(json_encode(["url" => $url]));
+
+    return $response->withHeader('Content-Type', 'application/json');
+});
 
 $app->run();
 ?>
