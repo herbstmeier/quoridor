@@ -10,25 +10,147 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-require_once 'Database.php';
-
 class UserController
 {
-    public function getAllUsers(Request $request, Response $response, $args)
+    private $db;
+    public function __construct(PDO $pdo)
     {
-        // Controller logic for getting all users
-        $response->getBody()->write('all users');
-        return $response->withStatus(200);
+        $this->db = $pdo;
     }
 
-    public function getUserById(Request $request, Response $response, $args)
+
+    public function getAllUsers(Request $request, Response $response, array $args)
     {
-        // Controller logic for getting a user by ID
+        // Query to retrieve all users
+        $query = "SELECT * FROM users";
+
+        try {
+            // Execute the query using the Database class
+            $users = $this->db->query($query)->fetchAll();
+
+            // Create a response in the specified style
+            $responseBody = json_encode($users);
+            $response->getBody()->write($responseBody);
+            return $response
+                ->withHeader('Content-Type', 'application/json');
+        } catch (PDOException $e) {
+            // Handle database errors and return an error response
+            $responseBody = json_encode(['error' => 'Database error']);
+            $response->getBody()->write($responseBody);
+            return $response
+                ->withStatus(500)
+                ->withHeader('Content-Type', 'application/json');
+        }
     }
 
-    public function updateUser(Request $request, Response $response, $args)
+    public function getUserById(Request $request, Response $response, array $args)
     {
-        // Controller logic for updating user data
+        // Get the user ID from the route parameters
+        $userId = $args['id'];
+
+        // Query to retrieve a user by ID
+        $query = "SELECT * FROM users WHERE id = :id";
+
+        try {
+            // Prepare the query
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':id', $userId);
+            $stmt->execute();
+
+            // Fetch the user as an associative array
+            $user = $stmt->fetch();
+
+            // Check if the user exists
+            if (!$user) {
+                $responseBody = json_encode(['error' => 'User not found']);
+                return $response
+                    ->withStatus(404)
+                    ->withHeader('Content-Type', 'application/json')
+                    ->getBody()
+                    ->write($responseBody);
+            }
+
+            // Return the user as JSON response
+            $responseBody = json_encode($user);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->getBody()
+                ->write($responseBody);
+        } catch (PDOException $e) {
+            // Handle database errors and return an error response
+            $responseBody = json_encode(['error' => 'Database error']);
+            return $response
+                ->withStatus(500)
+                ->withHeader('Content-Type', 'application/json')
+                ->getBody()
+                ->write($responseBody);
+        }
+    }
+
+    public function updateUser(Request $request, Response $response, array $args)
+    {
+        // Get the user ID from the route parameters
+        $userId = $args['id'];
+
+        // Parse the JSON request body
+        $data = json_decode($request->getBody(), true);
+
+        // Extract fields to update (assuming you have fields like 'username', 'theme', 'boardHue', etc.)
+        $fieldsToUpdate = ['username', 'theme', 'boardHue'];
+
+        // Generate the SQL query for updating user data
+        $setClauses = [];
+        $params = ['id' => $userId];
+
+        foreach ($fieldsToUpdate as $field) {
+            if (isset($data[$field])) {
+                $setClauses[] = "$field = :$field";
+                $params[$field] = $data[$field];
+            }
+        }
+
+        // Check if any fields were provided for update
+        if (empty($setClauses)) {
+            $responseBody = json_encode(['error' => 'No fields to update']);
+            return $response
+                ->withStatus(400) // Bad Request status code
+                ->withHeader('Content-Type', 'application/json')
+                ->getBody()
+                ->write($responseBody);
+        }
+
+        // Construct the SQL query
+        $query = "UPDATE users SET " . implode(', ', $setClauses) . " WHERE id = :id";
+
+        try {
+            // Prepare and execute the query
+            $stmt = $this->db->prepare($query);
+            $stmt->execute($params);
+
+            // Check if any rows were affected (indicating a successful update)
+            if ($stmt->rowCount() > 0) {
+                $responseBody = json_encode(['message' => 'User updated successfully']);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->getBody()
+                    ->write($responseBody);
+            } else {
+                $responseBody = json_encode(['error' => 'User not found or no changes were made']);
+                return $response
+                    ->withStatus(404) // Not Found status code
+                    ->withHeader('Content-Type', 'application/json')
+                    ->getBody()
+                    ->write($responseBody);
+            }
+        } catch (PDOException $e) {
+            // Handle database errors and return an error response
+            $responseBody = json_encode(['error' => 'Database error']);
+            return $response
+                ->withStatus(500) // Internal Server Error status code
+                ->withHeader('Content-Type', 'application/json')
+                ->getBody()
+                ->write($responseBody);
+        }
     }
 
     public function loginUser(Request $request, Response $response, $args)
@@ -53,7 +175,7 @@ class UserController
         require 'config.php'; // Assuming 'config.php' is in the same directory
 
         $sql = 'SELECT * FROM users WHERE username = :username';
-        $stmt = $pdo->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':username', $username);
 
         try {
@@ -131,12 +253,9 @@ class UserController
         // Set the initial boardHue to 22
         $boardHue = 22;
 
-        // Get the database connection from the Database class
-        $pdo = Database::getInstance();
-
         // Insert user data into the database using the obtained PDO instance
         $sql = 'INSERT INTO users (username, themeId, boardHue, password, salt) VALUES (:username, :themeId, :boardHue, :password, :salt)';
-        $stmt = $pdo->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':username', $data['username']);
         $stmt->bindParam(':themeId', $data['themeId']);
         $stmt->bindParam(':boardHue', $boardHue);
@@ -145,7 +264,7 @@ class UserController
 
         try {
             $stmt->execute();
-            $lastInsertedUserId = $pdo->lastInsertId();
+            $lastInsertedUserId = $this->db->lastInsertId();
         } catch (PDOException $e) {
             // Handle database errors and return an error response
             $responseBody = json_encode(['error' => 'Failed to register user']);
@@ -217,7 +336,7 @@ class UserController
 
         // Verify the token's signature and claims using your JWT library (e.g., firebase/php-jwt)
         try {
-            $decodedToken = JWT::decode($token, SECRET_KEY, );
+            $decodedToken = JWT::decode($token, SECRET_KEY,);
         } catch (\Exception $e) {
             // Handle token verification error
             $responseBody = json_encode(['error' => 'Invalid token']);
@@ -248,11 +367,8 @@ class UserController
     private function addToTokenBlacklist($token)
     {
         try {
-            // Get a database connection instance using the Database class
-            $db = Database::getInstance();
-
             // Prepare an SQL statement to insert the token and expiration time
-            $stmt = $db->prepare("INSERT INTO token_blacklist (token, expiration) VALUES (:token, NOW())");
+            $stmt = $this->db->prepare("INSERT INTO token_blacklist (token, expiration) VALUES (:token, NOW())");
 
             // Bind the token value to the SQL statement
             $stmt->bindParam(':token', $token, PDO::PARAM_STR);
@@ -270,11 +386,8 @@ class UserController
     private function isTokenBlacklisted($token)
     {
         try {
-            // Get a database connection instance using the Database class
-            $db = Database::getInstance();
-
             // Prepare an SQL statement to check if the token exists in the token_blacklist table
-            $stmt = $db->prepare("SELECT COUNT(*) FROM token_blacklist WHERE token = :token");
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM token_blacklist WHERE token = :token");
 
             // Bind the token value to the SQL statement
             $stmt->bindParam(':token', $token, PDO::PARAM_STR);
