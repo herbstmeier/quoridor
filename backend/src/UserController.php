@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Database;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use PDO;
 use PDOException;
 use Psr\Container\ContainerInterface;
@@ -336,7 +337,7 @@ class UserController
 
         // Verify the token's signature and claims using your JWT library (e.g., firebase/php-jwt)
         try {
-            $decodedToken = JWT::decode($token, SECRET_KEY,);
+            $decodedToken = JWT::decode($token, new Key(SECRET_KEY, 'HS256'));
         } catch (\Exception $e) {
             // Handle token verification error
             $responseBody = json_encode(['error' => 'Invalid token']);
@@ -465,7 +466,6 @@ class UserController
         if (empty($token)) {
             // Check cookies, query parameters, or any other locations where the token might be sent
             // For example, you might look for a cookie named 'auth_token' or a query parameter named 'token'
-            $token = $request->getCookieParam('auth_token'); // Example for cookies
             // $token = $request->getQueryParam('token'); // Example for query parameters
         }
 
