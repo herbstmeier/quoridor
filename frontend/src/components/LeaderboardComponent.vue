@@ -23,8 +23,8 @@ export default defineComponent({
   components: { UserListItem },
   data() {
     return {
-      // users: new Array<User>()
-      users: [User.getFake(), User.getFake()]
+      users: new Array<User>()
+      // users: [User.getFake(), User.getFake()]
     }
   },
   mounted: async function () {

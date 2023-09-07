@@ -1,7 +1,12 @@
 <template>
   <div class="auth-form-container">
     <span class="font-m">Register</span>
-    <form class="auth-form list-card" novalidate @submit.prevent="registerSubmit" ref="registerForm">
+    <form
+      class="auth-form list-card"
+      novalidate
+      @submit.prevent="registerSubmit"
+      ref="registerForm"
+    >
       <BigInput
         :label="'username'"
         :val="{ required: true, minlength: 3, maxlength: 30, type: 'text' }"
@@ -10,7 +15,14 @@
       />
       <BigInput
         :label="'password'"
-        :val="{ required: true, minlength: 4, maxlength: 50, type: 'password' }"
+        :val="{
+          required: true,
+          minlength: 4,
+          maxlength: 50,
+          type: 'password',
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d]).{4,50}$'
+        }"
+        :customError="'password must be at least 4 characters long and include at least one digit, lowercase letter, uppercase letter and special character'"
         @change="onPwChange"
         @validation="onPwVal"
       />
@@ -18,6 +30,7 @@
         :label="'confirm password'"
         :val="{ required: true, type: 'password' }"
         :customError="confirmError"
+        :forceCustomError="true"
         @change="onPwConfirmChange"
         @validation="onPwConfirmVal"
         ref="pwConfirmBigInput"
@@ -67,7 +80,7 @@ export default defineComponent({
         this.confirmError = ''
       }
     },
-    onUsernameVal(isValid: boolean){
+    onUsernameVal(isValid: boolean) {
       this.username.valid = isValid
     },
     onPwVal(isValid: boolean) {

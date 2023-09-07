@@ -6,9 +6,9 @@
       :name="fieldName"
       v-bind="val"
       v-model="value"
-      @input="onInput"
+      @input.prevent="onInput"
     />
-    <span class="field-error font-xs" v-if="errorMsg">{{ errorMsg }}</span>
+    <span class="field-error font-xs" v-if="isError">{{ errorMsg }}</span>
   </div>
 </template>
 <script lang="ts">
@@ -23,13 +23,16 @@ export default defineComponent({
     customError: {
       type: String,
       default: ''
-    }
+    },
+    forceCustomError: Boolean
   },
   data() {
     return {
       value: null,
       fieldName: this.label?.replace(/[^a-zA-Z]/g, ''),
-      error: ''
+      isError: false,
+      error: '',
+      useCustomError: false
     }
   },
   emits: {
@@ -44,15 +47,28 @@ export default defineComponent({
       if (input.checkValidity()) {
         this.$emit('validation', true)
         this.error = ''
+        this.isError = false
       } else {
         this.$emit('validation', false)
-        this.error = input.validationMessage.toLocaleLowerCase() ?? ''
+        this.isError = true
+        if (input.validity.patternMismatch) {
+          this.error = ''
+          this.useCustomError = true
+        } else {
+          this.error = input.validationMessage.toLocaleLowerCase() ?? ''
+        }
       }
     }
   },
   computed: {
     errorMsg() {
-      if (this.customError) {
+      if (this.forceCustomError) {
+        if (this.customError) {
+          return this.customError
+        } else {
+          return this.error
+        }
+      } else if (this.useCustomError) {
         return this.customError
       } else {
         return this.error

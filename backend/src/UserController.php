@@ -268,7 +268,7 @@ class UserController
             $lastInsertedUserId = $this->db->lastInsertId();
         } catch (PDOException $e) {
             // Handle database errors and return an error response
-            $responseBody = json_encode(['error' => 'Failed to register user']);
+            $responseBody = json_encode(['error' => 'Failed to register user', 'pdo' => $this->db]);
             $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
