@@ -268,12 +268,13 @@ class UserController
             $lastInsertedUserId = $this->db->lastInsertId();
         } catch (PDOException $e) {
             // Handle database errors and return an error response
-            $responseBody = json_encode(['error' => 'Failed to register user', 'pdo' => $this->db]);
+            $errorMessage = $e->getMessage(); // Get the specific PDO error message
+            $responseBody = json_encode(['error' => 'Failed to register user', 'pdo_error' => $errorMessage]);
             $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(500); // Internal Server Error status code
-        }
+        }        
 
         // Registration successful, return a success response
         // Generate a JWT token
