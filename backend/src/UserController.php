@@ -2,6 +2,10 @@
 
 namespace App\Controller;
 
+use Database;
+use Firebase\JWT\JWT;
+use PDO;
+use PDOException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -10,13 +14,6 @@ require_once 'Database.php';
 
 class UserController
 {
-    private $container;
-
-    // constructor receives container instance
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
 
     public function getAllUsers(Request $request, Response $response, $args)
     {
@@ -97,7 +94,7 @@ class UserController
                     ->withStatus(401) // Unauthorized status code
                     ->write($responseBody);
             }
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             // Handle database errors and return an error response
             $responseBody = json_encode(['error' => 'Login failed']);
             return $response
@@ -148,7 +145,7 @@ class UserController
         try {
             $stmt->execute();
             $lastInsertedUserId = $pdo->lastInsertId();
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             // Handle database errors and return an error response
             $responseBody = json_encode(['error' => 'Failed to register user']);
             return $response
@@ -172,8 +169,131 @@ class UserController
 
     public function logoutUser(Request $request, Response $response, $args)
     {
-        // Controller logic for logging out the user
+        // Verify the JWT token using the verifyToken function
+        $token = $this->verifyToken($request, $response, $args);
+
+        // If token verification fails, the verifyToken function will handle the response
+        if ($token === false) {
+            return $response; // Early return if verification fails
+        }
+
+        // Add the token to the blacklist
+        $this->addToTokenBlacklist($token);
+
+        // Respond with a success message
+        $responseBody = json_encode(['message' => 'Logout successful']);
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200) // OK status code
+            ->write($responseBody);
     }
+
+
+    public function verifyToken(Request $request, Response $response, $args)
+    {
+        // Get the JWT token from the request (e.g., from headers or cookies)
+        $token = $this->getTokenFromRequest($request);
+
+        // Check if a token was provided
+        if (!$token) {
+            // Handle the case where no token is provided
+            $responseBody = json_encode(['error' => 'No token provided']);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400) // Bad Request status code
+                ->write($responseBody);
+        }
+
+        // Check if the token is in the blacklist
+        if ($this->isTokenBlacklisted($token)) {
+            // Token is blacklisted, handle accordingly
+            $responseBody = json_encode(['error' => 'Token is blacklisted']);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401) // Unauthorized status code
+                ->write($responseBody);
+        }
+
+        // Verify the token's signature and claims using your JWT library (e.g., firebase/php-jwt)
+        try {
+            $decodedToken = JWT::decode($token, SECRET_KEY, ['HS256']);
+        } catch (\Exception $e) {
+            // Handle token verification error
+            $responseBody = json_encode(['error' => 'Invalid token']);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401) // Unauthorized status code
+                ->write($responseBody);
+        }
+
+        // Check the token's expiration time (exp claim)
+        $expirationTime = $decodedToken->exp;
+        if (time() >= $expirationTime) {
+            // Token has expired, handle accordingly
+            $responseBody = json_encode(['error' => 'Token has expired']);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401) // Unauthorized status code
+                ->write($responseBody);
+        }
+
+        // Token is valid; continue processing the request
+        // You can access claims from $decodedToken (e.g., $decodedToken->userId)
+        // ...
+
+        return $response;
+    }
+
+    private function addToTokenBlacklist($token)
+    {
+        try {
+            // Get a database connection instance using the Database class
+            $db = Database::getInstance();
+
+            // Prepare an SQL statement to insert the token and expiration time
+            $stmt = $db->prepare("INSERT INTO token_blacklist (token, expiration) VALUES (:token, NOW())");
+
+            // Bind the token value to the SQL statement
+            $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+
+            // Execute the SQL statement to insert the token
+            $stmt->execute();
+        } catch (PDOException $e) {
+            // Handle any database connection or query errors here
+            // You can log the error or return an error response
+            // For example:
+            die("Database Error: " . $e->getMessage());
+        }
+    }
+
+    private function isTokenBlacklisted($token)
+    {
+        try {
+            // Get a database connection instance using the Database class
+            $db = Database::getInstance();
+
+            // Prepare an SQL statement to check if the token exists in the token_blacklist table
+            $stmt = $db->prepare("SELECT COUNT(*) FROM token_blacklist WHERE token = :token");
+
+            // Bind the token value to the SQL statement
+            $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+
+            // Execute the SQL statement
+            $stmt->execute();
+
+            // Fetch the result (count of matching tokens)
+            $count = $stmt->fetchColumn();
+
+            // If count is greater than zero, the token is blacklisted
+            return $count > 0;
+        } catch (PDOException $e) {
+            // Handle any database connection or query errors here
+            // You can log the error or return an error response
+            // For example:
+            die("Database Error: " . $e->getMessage());
+        }
+    }
+
 
     private function validateRegistrationData($data)
     {
@@ -219,6 +339,23 @@ class UserController
         // Encode the payload using the secret key
         $token = JWT::encode($payload, SECRET_KEY, 'HS256');
 
+        return $token;
+    }
+
+    private function getTokenFromRequest(Request $request)
+    {
+        // Check if the token is provided in the request headers
+        $token = $request->getHeaderLine('Authorization');
+
+        // If the token is not in the headers, check if it's in the request cookies or other locations
+        if (empty($token)) {
+            // Check cookies, query parameters, or any other locations where the token might be sent
+            // For example, you might look for a cookie named 'auth_token' or a query parameter named 'token'
+            $token = $request->getCookieParam('auth_token'); // Example for cookies
+            // $token = $request->getQueryParam('token'); // Example for query parameters
+        }
+
+        // Return the extracted token, which may be empty if not found
         return $token;
     }
 }
