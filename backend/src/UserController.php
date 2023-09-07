@@ -86,7 +86,7 @@ class UserController
         $data = json_decode($request->getBody(), true);
 
         // Extract fields to update (assuming you have fields like 'username', 'theme', 'boardHue', etc.)
-        $fieldsToUpdate = ['username', 'theme', 'boardHue'];
+        $fieldsToUpdate = ['themeId', 'boardHue'];
 
         // Generate the SQL query for updating user data
         $setClauses = [];
@@ -134,7 +134,7 @@ class UserController
             }
         } catch (PDOException $e) {
             // Handle database errors and return an error response
-            $responseBody = json_encode(['error' => 'Database error']);
+            $responseBody = json_encode(['error' => 'Database error', 'pdo_error' => $e->getMessage()]);
             return $response
                 ->withStatus(500) // Internal Server Error status code
                 ->withHeader('Content-Type', 'application/json')
@@ -461,10 +461,10 @@ class UserController
     private function fetchUserData($userId)
     {
         // Query to retrieve a user by ID
-        $query = "SELECT * FROM users WHERE id = :id";
+        $query = "SELECT * FROM users WHERE userId = :userId";
         // Prepare the query
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':id', $userId);
+        $stmt->bindParam(':userId', $userId);
         $stmt->execute();
 
         // Fetch the user as an associative array
