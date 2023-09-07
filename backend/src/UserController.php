@@ -191,7 +191,7 @@ class UserController
                 $token = $this->generateToken($user);
                 $userData=$this->fetchUserData($user['userId']);
                 // Return the token to the client
-                $responseBody = json_encode(['token' => $token, 'user' => $userData]);
+                $responseBody = json_encode(['token' => $token, 'userData' => $userData]);
                 $response->getBody()->write($responseBody);
                 return $response
                     ->withHeader('Content-Type', 'application/json')
@@ -268,7 +268,7 @@ class UserController
         $token = $this->generateToken(['userId' => $lastInsertedUserId, 'username' => $data['username']]);
         $user = $this->fetchUserData($lastInsertedUserId);
         // Return the token to the client
-        $responseBody = json_encode(['token' => $token, 'user' => $user]);
+        $responseBody = json_encode(['token' => $token, 'userData' => $user]);
         $response->getBody()->write($responseBody);
         return $response
             ->withHeader('Content-Type', 'application/json')
@@ -461,7 +461,7 @@ class UserController
     private function fetchUserData($userId)
     {
         // Query to retrieve a user by ID
-        $query = "SELECT * FROM users WHERE userId = :userId";
+        $query = "SELECT userId,username,themeId,boardHue FROM users WHERE userId = :userId";
         // Prepare the query
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':userId', $userId);

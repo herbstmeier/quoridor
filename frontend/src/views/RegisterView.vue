@@ -65,9 +65,9 @@ export default defineComponent({
       data.append('themeId', '-1')
       this.$axios
         .post('/user/register', data)
-        .then((res: { data: { userData: User; jwt: any } }) => {
+        .then((res: { data: { userData: User; token: any } }) => {
           user.set(res.data.userData)
-          user.setStorage(res.data.jwt, res.data.userData.userId)
+          user.setStorage(res.data.token, res.data.userData.userId)
         })
     },
     onUsernameChange(value: string) {
