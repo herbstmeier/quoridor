@@ -14,10 +14,11 @@ require_once 'Database.php';
 
 class UserController
 {
-
     public function getAllUsers(Request $request, Response $response, $args)
     {
         // Controller logic for getting all users
+        $response->getBody()->write('all users');
+        return $response->withStatus(200);
     }
 
     public function getUserById(Request $request, Response $response, $args)
@@ -39,10 +40,10 @@ class UserController
         if (empty($data['username']) || empty($data['password'])) {
             // Handle missing username or password
             $responseBody = json_encode(['error' => 'Username and password are required.']);
+            $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(400) // Bad Request status code
-                ->write($responseBody);
+                ->withStatus(400); // Bad Request status code
         }
 
         // Retrieve user data from the database based on the provided username
@@ -62,10 +63,10 @@ class UserController
             if (!$user) {
                 // User not found, return an error response
                 $responseBody = json_encode(['error' => 'User not found']);
+                $response->getBody()->write($responseBody);
                 return $response
                     ->withHeader('Content-Type', 'application/json')
-                    ->withStatus(404) // Not Found status code
-                    ->write($responseBody);
+                    ->withStatus(404); // Not Found status code
             }
 
             // Verify the password using the secret key from the configuration file
@@ -82,25 +83,25 @@ class UserController
 
                 // Return the token to the client
                 $responseBody = json_encode(['token' => $token]);
+                $response->getBody()->write($responseBody);
                 return $response
                     ->withHeader('Content-Type', 'application/json')
-                    ->withStatus(200) // OK status code
-                    ->write($responseBody);
+                    ->withStatus(200); // OK status code
             } else {
                 // Password is incorrect, return an error response
                 $responseBody = json_encode(['error' => 'Incorrect password']);
+                $response->getBody()->write($responseBody);
                 return $response
                     ->withHeader('Content-Type', 'application/json')
-                    ->withStatus(401) // Unauthorized status code
-                    ->write($responseBody);
+                    ->withStatus(401); // Unauthorized status code
             }
         } catch (PDOException $e) {
             // Handle database errors and return an error response
             $responseBody = json_encode(['error' => 'Login failed']);
+            $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(500) // Internal Server Error status code
-                ->write($responseBody);
+                ->withStatus(500); // Internal Server Error status code
         }
     }
 
@@ -115,10 +116,10 @@ class UserController
         if (!empty($validationErrors)) {
             // Handle validation errors and return a response with error messages
             $responseBody = json_encode(['errors' => $validationErrors]);
+            $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(400) // Bad Request status code
-                ->write($responseBody);
+                ->withStatus(400); // Bad Request status code
         }
 
         // Generate a random salt
@@ -148,10 +149,10 @@ class UserController
         } catch (PDOException $e) {
             // Handle database errors and return an error response
             $responseBody = json_encode(['error' => 'Failed to register user']);
+            $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(500) // Internal Server Error status code
-                ->write($responseBody);
+                ->withStatus(500); // Internal Server Error status code
         }
 
         // Registration successful, return a success response
@@ -160,10 +161,10 @@ class UserController
 
         // Return the token to the client
         $responseBody = json_encode(['token' => $token]);
+        $response->getBody()->write($responseBody);
         return $response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus(200) // OK status code
-            ->write($responseBody);
+            ->withStatus(200); // OK status code
     }
 
 
@@ -182,10 +183,10 @@ class UserController
 
         // Respond with a success message
         $responseBody = json_encode(['message' => 'Logout successful']);
+        $response->getBody()->write($responseBody);
         return $response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus(200) // OK status code
-            ->write($responseBody);
+            ->withStatus(200); // OK status code
     }
 
 
@@ -198,32 +199,32 @@ class UserController
         if (!$token) {
             // Handle the case where no token is provided
             $responseBody = json_encode(['error' => 'No token provided']);
+            $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(400) // Bad Request status code
-                ->write($responseBody);
+                ->withStatus(400); // Bad Request status code
         }
 
         // Check if the token is in the blacklist
         if ($this->isTokenBlacklisted($token)) {
             // Token is blacklisted, handle accordingly
             $responseBody = json_encode(['error' => 'Token is blacklisted']);
+            $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(401) // Unauthorized status code
-                ->write($responseBody);
+                ->withStatus(401); // Unauthorized status code
         }
 
         // Verify the token's signature and claims using your JWT library (e.g., firebase/php-jwt)
         try {
-            $decodedToken = JWT::decode($token, SECRET_KEY, ['HS256']);
+            $decodedToken = JWT::decode($token, SECRET_KEY, );
         } catch (\Exception $e) {
             // Handle token verification error
             $responseBody = json_encode(['error' => 'Invalid token']);
+            $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(401) // Unauthorized status code
-                ->write($responseBody);
+                ->withStatus(401); // Unauthorized status code
         }
 
         // Check the token's expiration time (exp claim)
@@ -231,10 +232,10 @@ class UserController
         if (time() >= $expirationTime) {
             // Token has expired, handle accordingly
             $responseBody = json_encode(['error' => 'Token has expired']);
+            $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(401) // Unauthorized status code
-                ->write($responseBody);
+                ->withStatus(401); // Unauthorized status code
         }
 
         // Token is valid; continue processing the request

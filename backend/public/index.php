@@ -2,13 +2,13 @@
 include '../config/config.php';
 use Slim\Factory\AppFactory;
 use DI\Container;
-use App\Controller\UserController;
+require '../src/UserController.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 $container = new Container();
 AppFactory::setContainer($container); // Set Slim's default container to use yours
 $container->set('UserController', function() {
-    return new UserController();
+    return new \App\Controller\UserController();
 });
 
 $app = AppFactory::create();
