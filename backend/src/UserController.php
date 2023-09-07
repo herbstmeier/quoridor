@@ -435,9 +435,6 @@ class UserController
             'username' => $user['username'],
         ];
 
-        // Get the secret key from the configuration file
-        require '../config/config.php';
-
         // Encode the payload using the secret key
         $token = JWT::encode($payload, SECRET_KEY, 'HS256');
 
