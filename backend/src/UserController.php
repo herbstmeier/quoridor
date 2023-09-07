@@ -206,7 +206,8 @@ class UserController
             }
         } catch (PDOException $e) {
             // Handle database errors and return an error response
-            $responseBody = json_encode(['error' => 'Login failed']);
+            $errorMessage = $e->getMessage(); // Get the specific PDO error message
+            $responseBody = json_encode(['error' => 'Login failed', 'pdo_error' => $errorMessage]);
             $response->getBody()->write($responseBody);
             return $response
                 ->withHeader('Content-Type', 'application/json')

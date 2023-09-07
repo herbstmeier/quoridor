@@ -37,6 +37,7 @@ export const user = reactive({
         if (token !== null && id !== null) {
             this.getFromDb(id).then((res: { data: User }) => {
                 this.data = res.data
+                theme.setTheme('dark')
             })
         }
     },
