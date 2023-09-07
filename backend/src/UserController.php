@@ -2,12 +2,10 @@
 
 namespace App\Controller;
 
-use Database;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use PDO;
 use PDOException;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -162,9 +160,6 @@ class UserController
 
         // Retrieve user data from the database based on the provided username
         $username = $data['username'];
-
-        // Get the secret key from the configuration file
-        require 'config.php'; // Assuming 'config.php' is in the same directory
 
         $sql = 'SELECT * FROM users WHERE username = :username';
         $stmt = $this->db->prepare($sql);
