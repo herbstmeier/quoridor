@@ -6,6 +6,7 @@ const axios = axiosSetup()
 
 export const theme = reactive({
     value: '',
+    isUserPreference: false,
     setTheme(theme: string) {
         if (document.body.classList.contains(this.value)) {
             document.body.classList.replace(this.value, theme)

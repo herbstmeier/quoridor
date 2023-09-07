@@ -42,6 +42,8 @@
 
 <script lang="ts">
 import BigInput from '@/components/BigInput.vue'
+import type { User } from '@/models/User'
+import { user } from '@/state'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -59,7 +61,14 @@ export default defineComponent({
   },
   methods: {
     registerSubmit(e: Event) {
-      this.$axios.post('/user/register', new FormData(e.target as HTMLFormElement))
+      const data = new FormData(e.target as HTMLFormElement)
+      data.append('themeId', '-1')
+      this.$axios
+        .post('/user/register', data)
+        .then((res: { data: { userData: User; jwt: any } }) => {
+          user.set(res.data.userData)
+          user.setStorage(res.data.jwt, res.data.userData.userId)
+        })
     },
     onUsernameChange(value: string) {
       this.username.value = value

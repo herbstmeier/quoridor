@@ -49,17 +49,8 @@ class UserController
         // Get the user ID from the route parameters
         $userId = $args['id'];
 
-        // Query to retrieve a user by ID
-        $query = "SELECT * FROM users WHERE id = :id";
-
         try {
-            // Prepare the query
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':id', $userId);
-            $stmt->execute();
-
-            // Fetch the user as an associative array
-            $user = $stmt->fetch();
+            $user = $this->fetchUserData($userId);
 
             // Check if the user exists
             if (!$user) {
@@ -203,9 +194,9 @@ class UserController
 
                 // Generate a JWT token
                 $token = $this->generateToken($user);
-
+                $userData=$this->fetchUserData($user['userId']);
                 // Return the token to the client
-                $responseBody = json_encode(['token' => $token]);
+                $responseBody = json_encode(['token' => $token, 'user' => $userData]);
                 $response->getBody()->write($responseBody);
                 return $response
                     ->withHeader('Content-Type', 'application/json')
@@ -274,14 +265,14 @@ class UserController
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(500); // Internal Server Error status code
-        }        
+        }
 
         // Registration successful, return a success response
         // Generate a JWT token
         $token = $this->generateToken(['userId' => $lastInsertedUserId, 'username' => $data['username']]);
-
+        $user = $this->fetchUserData($lastInsertedUserId);
         // Return the token to the client
-        $responseBody = json_encode(['token' => $token]);
+        $responseBody = json_encode(['token' => $token, 'user' => $user]);
         $response->getBody()->write($responseBody);
         return $response
             ->withHeader('Content-Type', 'application/json')
@@ -472,5 +463,18 @@ class UserController
 
         // Return the extracted token, which may be empty if not found
         return $token;
+    }
+
+    private function fetchUserData($userId)
+    {
+        // Query to retrieve a user by ID
+        $query = "SELECT * FROM users WHERE id = :id";
+        // Prepare the query
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':id', $userId);
+        $stmt->execute();
+
+        // Fetch the user as an associative array
+        return $stmt->fetch();
     }
 }
