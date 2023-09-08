@@ -1,0 +1,1 @@
+.create-container{display:flex;flex-direction:row;flex-wrap:wrap;gap:2rem;padding:1rem}.home-container{display:grid;grid-template-columns:repeat(3,1fr);gap:5rem}.home-container .new-game-card{grid-area:2/1/span 1/span 3}

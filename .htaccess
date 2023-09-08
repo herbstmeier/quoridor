@@ -1,6 +1,0 @@
-<IfModule mod_rewrite.c>
-   RewriteEngine on
-
-   # Redirect requests to /api/... to /backend/public/index.php
-   RewriteRule ^api/(.*)$ /backend/public/index.php/$1 [L]
-</IfModule>
