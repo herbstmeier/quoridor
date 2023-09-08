@@ -1,7 +1,7 @@
 <template>
-  <div class="list-card">
+  <div class="card" v-if="users.length > 0">
     <!-- <div class="font-s">leaderboard</div> -->
-    <div class="list-title">
+    <div class="card-title">
       <font-awesome-icon icon="fas fa-trophy" />
     </div>
     <div class="list-container">

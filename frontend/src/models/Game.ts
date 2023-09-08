@@ -1,6 +1,5 @@
 export class Game {
     gameId: number
-    gameName: string
     createdBy: number
     createdAt: string
     nPlayers: number
@@ -14,7 +13,6 @@ export class Game {
 
     constructor(data: any) {
         this.gameId = data?.gameId
-        this.gameName = data?.gameName
         this.createdBy = data?.createdBy
         this.createdAt = data?.createdAt
         this.nPlayers = data?.nPlayers

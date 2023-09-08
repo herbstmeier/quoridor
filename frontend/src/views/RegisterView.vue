@@ -2,7 +2,7 @@
   <div class="auth-form-container">
     <span class="font-m">Register</span>
     <form
-      class="auth-form list-card"
+      class="auth-form card"
       novalidate
       @submit.prevent="registerSubmit"
       ref="registerForm"
@@ -68,6 +68,7 @@ export default defineComponent({
         .then((res: { data: { userData: User; token: any } }) => {
           user.set(res.data.userData)
           user.setStorage(res.data.token, res.data.userData.userId)
+          this.$router.push({ name: 'home' })
         })
     },
     onUsernameChange(value: string) {

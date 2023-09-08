@@ -22,4 +22,13 @@ export class User {
             boardHue: 22
         })
     }
-}
+
+    static getEmpty() {
+        return new User({
+            userId: 0,
+            username: '',
+            wins: 0,
+            theme: 'light',
+            boardHue: 22
+        })
+    }}

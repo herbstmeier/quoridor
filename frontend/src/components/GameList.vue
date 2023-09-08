@@ -1,6 +1,6 @@
 <template>
-  <div class="list-card">
-    <div class="list-title">
+  <div class="card">
+    <div class="card-title">
       <font-awesome-icon v-if="icon" v-bind="{icon: icon}" />
       <div v-if="title" class="font-s">{{ title }}</div>
     </div>

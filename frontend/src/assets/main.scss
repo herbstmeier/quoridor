@@ -62,7 +62,7 @@ button {
   }
 }
 
-.list-card {
+.card {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -72,7 +72,7 @@ button {
   overflow: hidden;
   height: fit-content;
 
-  .list-title {
+  .card-title {
     padding: 1rem 0;
     background: var(--color-translucent);
     width: 100%;

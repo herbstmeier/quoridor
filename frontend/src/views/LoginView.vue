@@ -1,7 +1,7 @@
 <template>
   <div class="auth-form-container">
     <span class="font-m">Login</span>
-    <form class="auth-form list-card" novalidate @submit.prevent="loginSubmit">
+    <form class="auth-form card" novalidate @submit.prevent="loginSubmit">
       <BigInput
         :label="'username'"
         :val="{ required: true, type: 'text' }"
@@ -38,6 +38,7 @@ export default defineComponent({
         .then((res: { data: { userData: User; token: any } }) => {
           user.set(res.data.userData)
           user.setStorage(res.data.token, res.data.userData.userId)
+          this.$router.push({ name: 'home' })
         })
     },
     onUsernameVal(isValid: boolean) {

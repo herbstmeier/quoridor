@@ -4,6 +4,7 @@ import GameList from '@/components/GameList.vue'
 import LeaderboardComponent from '@/components/LeaderboardComponent.vue'
 import { user } from '@/state'
 import { Game } from '@/models/Game'
+import NewGameComponentVue from '@/components/NewGameComponent.vue'
 
 export default defineComponent({
   name: 'HomeView',
@@ -16,7 +17,8 @@ export default defineComponent({
   },
   components: {
     GameList,
-    LeaderboardComponent
+    LeaderboardComponent,
+    NewGameComponentVue
   },
   methods: {},
   mounted: async function () {
@@ -45,7 +47,8 @@ export default defineComponent({
     />
     <GameList v-if="createdGames.length > 0" :games="createdGames" :icon="'fas fa-hat-cowboy'" />
     <GameList v-if="ongoingGames.length > 0" :games="ongoingGames" :icon="'fas fa-binoculars'" />
-    </div>
+    <NewGameComponentVue class="new-game-card" />
+  </div>
 </template>
 
 <style lang="scss">
@@ -53,5 +56,9 @@ export default defineComponent({
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 5rem;
+
+  .new-game-card {
+    grid-area: 2/1 / span 1 / span 3;
+  }
 }
 </style>
